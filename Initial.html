@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Электронный журнал студентов</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e8e8e8;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #e94560;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a0a0a0;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #e94560;
+            border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+            padding-bottom: 8px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            padding: 10px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: #e94560;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #e94560;
+            color: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background: #ff6b81;
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        button.secondary {
+            background: #0f3460;
+        }
+
+        button.secondary:hover {
+            background: #1a4a7a;
+        }
+
+        button.danger {
+            background: #c0392b;
+        }
+
+        button.danger:hover {
+            background: #e74c3c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            color: #e94560;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-box .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e94560;
+            margin: 5px 0;
+        }
+
+        .stat-box .label {
+            font-size: 0.85rem;
+            color: #a0a0a0;
+        }
+
+        .empty {
+            text-align: center;
+            color: #888;
+            padding: 30px;
+        }
+
+        .message {
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(46, 204, 113, 0.15);
+            border: 1px solid rgba(46, 204, 113, 0.4);
+            color: #2ecc71;
+            display: block;
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.15);
+            border: 1px solid rgba(231, 76, 60, 0.4);
+            color: #e74c3c;
+            display: block;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .actions button {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            input, button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Электронный журнал студентов</h1>
+        <p class="subtitle">Простой веб-вариант программы</p>
+
+        <!-- Добавление студента -->
+        <div class="card">
+            <h2>Добавить студента</h2>
+            <div class="form-row">
+                <input type="text" id="studentName" placeholder="Имя студента" style="flex: 1;">
+                <button onclick="addStudent()">Добавить</button>
+            </div>
+            <div id="msgAdd" class="message"></div>
+        </div>
+
+        <!-- Добавление оценки -->
+        <div class="card">
+            <h2>Добавить оценку</h2>
+            <div class="form-row">
+                <input type="number" id="gradeId" placeholder="ID студента" style="width: 140px;">
+                <input type="number" id="gradeValue" placeholder="Оценка (0-100)" min="0" max="100" step="0.1" style="width: 160px;">
+                <button onclick="addGrade()">Выставить</button>
+            </div>
+            <div id="msgGrade" class="message"></div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="card">
+            <h2>Статистика</h2>
+            <div class="stats" id="stats">
+                <div class="stat-box">
+                    <div class="label">Всего студентов</div>
+                    <div class="value" id="statTotal">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Средний балл группы</div>
+                    <div class="value" id="statAvg">—</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Лучший студент</div>
+                    <div class="value" id="statTop" style="font-size: 1.1rem;">—</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Самый низкий балл</div>
+                    <div class="value" id="statBottom" style="font-size: 1.1rem;">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список студентов -->
+        <div class="card">
+            <h2>Список студентов</h2>
+            <div id="studentList">
+                <div class="empty">Список пуст</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class Student {
+            constructor(name, id) {
+                this.name = name;
+                this.id = id;
+                this.grades = [];
+            }
+
+            addGrade(grade) {
+                if (grade >= 0 && grade <= 100) {
+                    this.grades.push(grade);
+                    return true;
+                }
+                return false;
+            }
+
+            getAverage() {
+                if (this.grades.length === 0) return 0;
+                return this.grades.reduce((a, b) => a + b, 0) / this.grades.length;
+            }
+        }
+
+        class GradeBook {
+            constructor() {
+                this.students = [];
+                this.nextId = 1001;
+            }
+
+            addStudent(name) {
+                const student = new Student(name, this.nextId);
+                this.students.push(student);
+                this.nextId++;
+                return student;
+            }
+
+            findStudent(id) {
+                return this.students.find(s => s.id === id) || null;
+            }
+
+            removeStudent(id) {
+                const index = this.students.findIndex(s => s.id === id);
+                if (index !== -1) {
+                    this.students.splice(index, 1);
+                    return true;
+                }
+                return false;
+            }
+
+            getStatistics() {
+                const withGrades = this.students.filter(s => s.grades.length > 0);
+                if (withGrades.length === 0) {
+                    return {
+                        total: this.students.length,
+                        avg: null,
+                        top: null,
+                        bottom: null
+                    };
+                }
+
+                let totalAvg = 0;
+                let maxAvg = -1;
+                let minAvg = 101;
+                let topStudent = null;
+                let bottomStudent = null;
+
+                for (const s of withGrades) {
+                    const avg = s.getAverage();
+                    totalAvg += avg;
+                    if (avg > maxAvg) {
+                        maxAvg = avg;
+                        topStudent = s;
+                    }
+                    if (avg < minAvg) {
+                        minAvg = avg;
+                        bottomStudent = s;
+                    }
+                }
+
+                return {
+                    total: this.students.length,
+                    avg: totalAvg / withGrades.length,
+                    top: topStudent,
+                    bottom: bottomStudent
+                };
+            }
+        }
+
+        const book = new GradeBook();
+
+        // Тестовые данные
+        book.addStudent("Иван Петров");
+        book.addStudent("Анна Сидорова");
+        book.addStudent("Алексей Козлов");
+        book.findStudent(1001).addGrade(85.5);
+        book.findStudent(1001).addGrade(90.0);
+        book.findStudent(1002).addGrade(78.0);
+        book.findStudent(1002).addGrade(82.5);
+        book.findStudent(1002).addGrade(91.0);
+        book.findStudent(1003).addGrade(95.0);
+
+        function showMessage(elementId, text, isError = false) {
+            const el = document.getElementById(elementId);
+            el.textContent = text;
+            el.className = 'message ' + (isError ? 'error' : 'success');
+            setTimeout(() => {
+                el.className = 'message';
+                el.textContent = '';
+            }, 3000);
+        }
+
+        function addStudent() {
+            const input = document.getElementById('studentName');
+            const name = input.value.trim();
+            if (!name) {
+                showMessage('msgAdd', 'Имя не может быть пустым', true);
+                return;
+            }
+            const s = book.addStudent(name);
+            showMessage('msgAdd', `Студент "${name}" добавлен с ID ${s.id}`);
+            input.value = '';
+            render();
+        }
+
+        function addGrade() {
+            const id = parseInt(document.getElementById('gradeId').value);
+            const grade = parseFloat(document.getElementById('gradeValue').value);
+
+            if (isNaN(id) || isNaN(grade)) {
+                showMessage('msgGrade', 'Неверный ввод', true);
+                return;
+            }
+
+            const s = book.findStudent(id);
+            if (!s) {
+                showMessage('msgGrade', `Студент с ID ${id} не найден`, true);
+                return;
+            }
+
+            if (s.addGrade(grade)) {
+                showMessage('msgGrade', `Оценка ${grade} добавлена студенту ${s.name}`);
+                document.getElementById('gradeId').value = '';
+                document.getElementById('gradeValue').value = '';
+                render();
+            } else {
+                showMessage('msgGrade', 'Оценка должна быть от 0 до 100', true);
+            }
+        }
+
+        function removeStudent(id) {
+            if (book.removeStudent(id)) {
+                render();
+            }
+        }
+
+        function render() {
+            // Список студентов
+            const list = document.getElementById('studentList');
+            if (book.students.length === 0) {
+                list.innerHTML = '<div class="empty">Список пуст</div>';
+            } else {
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя</th>
+                                <th>Средний балл</th>
+                                <th>Оценок</th>
+                                <th>Оценки</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                for (const s of book.students) {
+                    const avg = s.grades.length ? s.getAverage().toFixed(2) : '—';
+                    const gradesStr = s.grades.length ? s.grades.join(', ') : 'нет';
+                    html += `
+                        <tr>
+                            <td>${s.id}</td>
+                            <td>${s.name}</td>
+                            <td>${avg}</td>
+                            <td>${s.grades.length}</td>
+                            <td style="font-size: 0.85rem; color: #aaa;">${gradesStr}</td>
+                            <td class="actions">
+                                <button class="danger" onclick="removeStudent(${s.id})">Удалить</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+                html += '</tbody></table>';
+                list.innerHTML = html;
+            }
+
+            // Статистика
+            const stats = book.getStatistics();
+            document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statAvg').textContent = stats.avg !== null ? stats.avg.toFixed(2) : '—';
+            document.getElementById('statTop').textContent = stats.top 
+                ? `${stats.top.name} (${stats.top.getAverage().toFixed(2)})` 
+                : '—';
+            document.getElementById('statBottom').textContent = stats.bottom 
+                ? `${stats.bottom.name} (${stats.bottom.getAverage().toFixed(2)})` 
+                : '—';
+        }
+
+        // Enter для удобства
+        document.getElementById('studentName').addEventListener('keydown', e => {
+            if (e.key === 'Enter') addStudent();
+        });
+        document.getElementById('gradeValue').addEventListener('keydown', e => {
+            if (e.key === 'Enter') addGrade();
+        });
+
+        // Первоначальный рендер
+        render();
+    </script>
+</body>
+</html>
